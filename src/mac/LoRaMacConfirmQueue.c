@@ -54,7 +54,7 @@ typedef struct sLoRaMacConfirmQueueCtx
     /*!
     * LoRaMac callback function primitives
     */
-    LoRaMacPrimitives_t* Primitives;
+    const LoRaMacPrimitives_t* Primitives;
     /*!
     * Pointer to the first element of the ring buffer
     */
@@ -143,7 +143,7 @@ static MlmeConfirmQueue_t* GetElement( Mlme_t request, MlmeConfirmQueue_t* buffe
     return NULL;
 }
 
-void LoRaMacConfirmQueueInit( LoRaMacPrimitives_t* primitives )
+void LoRaMacConfirmQueueInit( const LoRaMacPrimitives_t* primitives )
 {
     ConfirmQueueCtx.Primitives = primitives;
 
