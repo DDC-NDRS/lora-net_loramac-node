@@ -83,7 +83,7 @@ typedef struct sMlmeConfirmQueue
  *
  * \param   [IN] primitives - Pointer to the LoRaMac primitives.
  */
-void LoRaMacConfirmQueueInit( LoRaMacPrimitives_t* primitive );
+void LoRaMacConfirmQueueInit( LoRaMacPrimitives_t const* primitive );
 
 /*!
  * \brief   Adds an element to the confirm queue.

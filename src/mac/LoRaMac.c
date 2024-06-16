@@ -142,11 +142,11 @@ typedef struct sLoRaMacCtx
     /*
     * LoRaMac upper layer event functions
     */
-    LoRaMacPrimitives_t* MacPrimitives;
+    LoRaMacPrimitives_t const* MacPrimitives;
     /*
     * LoRaMac upper layer callback functions
     */
-    LoRaMacCallback_t* MacCallbacks;
+    LoRaMacCallback_t const* MacCallbacks;
     /*
     * Radio events function pointer
     */
@@ -3736,7 +3736,7 @@ static uint8_t IsRequestPending( void )
 }
 
 
-LoRaMacStatus_t LoRaMacInitialization( LoRaMacPrimitives_t* primitives, LoRaMacCallback_t* callbacks, LoRaMacRegion_t region )
+LoRaMacStatus_t LoRaMacInitialization( LoRaMacPrimitives_t const* primitives, LoRaMacCallback_t const* callbacks, LoRaMacRegion_t region )
 {
     GetPhyParams_t getPhy;
     PhyParam_t phyParam;
