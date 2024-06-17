@@ -408,7 +408,7 @@ struct Radio_s
  * \remark This variable is defined and initialized in the specific radio
  *         board implementation
  */
-extern const struct Radio_s Radio;
+extern struct Radio_s const Radio;
 
 #ifdef __cplusplus
 }
