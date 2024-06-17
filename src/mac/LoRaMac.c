@@ -2075,8 +2075,9 @@ static void ProcessMacCommands(uint8_t* payload, uint8_t macIndex, uint8_t comma
             case SRV_MAC_LINK_CHECK_ANS : {
                 if (LoRaMacConfirmQueueIsCmdActive(MLME_LINK_CHECK) == true) {
                     LoRaMacConfirmQueueSetStatus(LORAMAC_EVENT_INFO_STATUS_OK, MLME_LINK_CHECK);
-                    MacCtx.MlmeConfirm.DemodMargin = payload[macIndex++];
-                    MacCtx.MlmeConfirm.NbGateways  = payload[macIndex++];
+                    MacCtx.MlmeConfirm.DemodMargin = payload[macIndex];
+                    MacCtx.MlmeConfirm.NbGateways  = payload[macIndex + 1];
+                    macIndex += 2;
                 }
                 break;
             }
@@ -2141,7 +2142,7 @@ static void ProcessMacCommands(uint8_t* payload, uint8_t macIndex, uint8_t comma
                             LoRaMacCommandsAddCmd(MOTE_MAC_LINK_ADR_ANS, &status, 1);
                         }
                         // Update MAC index
-                        macIndex += linkAdrNbBytesParsed - 1;
+                        macIndex += (linkAdrNbBytesParsed - 1);
 
                         // Check to prevent invalid access
                         if (macIndex >= commandsSize) {
@@ -2174,18 +2175,18 @@ static void ProcessMacCommands(uint8_t* payload, uint8_t macIndex, uint8_t comma
                 status = 0x07;
 
                 rxParamSetupReq.DrOffset = (payload[macIndex] >> 4) & 0x07;
-                rxParamSetupReq.Datarate = payload[macIndex] & 0x0F;
-                macIndex++;
+                rxParamSetupReq.Datarate =  payload[macIndex] & 0x0F;
 
                 if (rxParamSetupReq.Datarate == 0x0F) {
                     // Keep the current datarate
                     rxParamSetupReq.Datarate = MacGrp2->MacParams.Rx2Channel.Datarate;
                 }
 
-                rxParamSetupReq.Frequency  = (uint32_t)payload[macIndex++];
-                rxParamSetupReq.Frequency |= (uint32_t)payload[macIndex++] << 8;
-                rxParamSetupReq.Frequency |= (uint32_t)payload[macIndex++] << 16;
+                rxParamSetupReq.Frequency  = (uint32_t)payload[macIndex + 1];
+                rxParamSetupReq.Frequency |= (uint32_t)payload[macIndex + 2] << 8;
+                rxParamSetupReq.Frequency |= (uint32_t)payload[macIndex + 3] << 16;
                 rxParamSetupReq.Frequency *= 100;
+                macIndex += 4;
 
                 // Perform request on region
                 status = RegionRxParamSetupReq(MacGrp2->Region, &rxParamSetupReq);
@@ -2219,15 +2220,16 @@ static void ProcessMacCommands(uint8_t* payload, uint8_t macIndex, uint8_t comma
                 ChannelParams_t chParam;
                 status = 0x03;
 
-                newChannelReq.ChannelId  = payload[macIndex++];
+                newChannelReq.ChannelId  = payload[macIndex];
                 newChannelReq.NewChannel = &chParam;
 
-                chParam.Frequency  = (uint32_t)payload[macIndex++];
-                chParam.Frequency |= (uint32_t)payload[macIndex++] << 8;
-                chParam.Frequency |= (uint32_t)payload[macIndex++] << 16;
+                chParam.Frequency  = (uint32_t)payload[macIndex + 1];
+                chParam.Frequency |= (uint32_t)payload[macIndex + 2] << 8;
+                chParam.Frequency |= (uint32_t)payload[macIndex + 3] << 16;
                 chParam.Frequency *= 100;
                 chParam.Rx1Frequency  = 0;
-                chParam.DrRange.Value = payload[macIndex++];
+                chParam.DrRange.Value = payload[macIndex + 4];
+                macIndex += 5;
 
                 status = (uint8_t)RegionNewChannelReq(MacGrp2->Region, &newChannelReq);
 
@@ -2304,11 +2306,12 @@ static void ProcessMacCommands(uint8_t* payload, uint8_t macIndex, uint8_t comma
                 uint32_t Frequency;
                 status = 0x03;
 
-                dlChannelReq.ChannelId = payload[macIndex++];
-                Frequency  = (uint32_t)payload[macIndex++];
-                Frequency |= (uint32_t)payload[macIndex++] << 8;
-                Frequency |= (uint32_t)payload[macIndex++] << 16;
+                dlChannelReq.ChannelId = payload[macIndex];
+                Frequency  = (uint32_t)payload[macIndex + 1];
+                Frequency |= (uint32_t)payload[macIndex + 2] << 8;
+                Frequency |= (uint32_t)payload[macIndex + 3] << 16;
                 Frequency *= 100;
+                macIndex += 4;
 
                 dlChannelReq.Rx1Frequency = Frequency;
                 status = (uint8_t)RegionDlChannelReq(MacGrp2->Region, &dlChannelReq);
@@ -2351,10 +2354,9 @@ static void ProcessMacCommands(uint8_t* payload, uint8_t macIndex, uint8_t comma
                 // Parse payload
                 uint8_t period = (0x38 & payload[macIndex]) >> 3;
                 MacGrp2->ForceRejoinMaxRetries = 0x07 & payload[macIndex];
-                macIndex++;
-                MacGrp2->ForceRejoinType  = (0x70 & payload[macIndex]) >> 4;
-                MacGrp1->ChannelsDatarate = 0x0F & payload[macIndex];
-                macIndex++;
+                MacGrp2->ForceRejoinType  = (0x70 & payload[macIndex + 1]) >> 4;
+                MacGrp1->ChannelsDatarate = 0x0F & payload[macIndex + 1];
+                macIndex += 2;
 
                 // Calc delay between retransmissions: 32 seconds x 2^Period + Rand32
                 uint32_t rejoinCycleInSec = 32 * (0x01 << period) + randr(0, 32);
@@ -2411,18 +2413,19 @@ static void ProcessMacCommands(uint8_t* payload, uint8_t macIndex, uint8_t comma
                 if (LoRaMacConfirmQueueIsCmdActive(MLME_DEVICE_TIME) == true) {
                     LoRaMacConfirmQueueSetStatus(LORAMAC_EVENT_INFO_STATUS_OK, MLME_DEVICE_TIME);
 
-                    SysTime_t gpsEpochTime   = {0};
-                    SysTime_t sysTime        = {0};
-                    SysTime_t sysTimeCurrent = {0};
-                    uint32_t Seconds;
+                    SysTime_t gpsEpochTime;
+                    SysTime_t sysTime;
+                    SysTime_t sysTimeCurrent;
+                    uint32_t  Seconds;
 
-                    Seconds  = (uint32_t)payload[macIndex++];
-                    Seconds |= (uint32_t)payload[macIndex++] << 8;
-                    Seconds |= (uint32_t)payload[macIndex++] << 16;
-                    Seconds |= (uint32_t)payload[macIndex++] << 24;
+                    Seconds  = (uint32_t)payload[macIndex];
+                    Seconds |= (uint32_t)payload[macIndex + 1] << 8;
+                    Seconds |= (uint32_t)payload[macIndex + 2] << 16;
+                    Seconds |= (uint32_t)payload[macIndex + 3] << 24;
 
                     gpsEpochTime.Seconds = Seconds;
-                    gpsEpochTime.SubSeconds = payload[macIndex++];
+                    gpsEpochTime.SubSeconds = (int16_t)payload[macIndex + 4];
+                    macIndex += 5;
 
                     // Convert the fractional second received in ms
                     // round( pow( 0.5, 8.0 ) * 1000 ) = 3.90625
@@ -2467,11 +2470,12 @@ static void ProcessMacCommands(uint8_t* payload, uint8_t macIndex, uint8_t comma
                 uint32_t frequency;
                 uint8_t  datarate;
 
-                frequency  = (uint32_t)payload[macIndex++];
-                frequency |= (uint32_t)payload[macIndex++] << 8;
-                frequency |= (uint32_t)payload[macIndex++] << 16;
+                frequency  = (uint32_t)payload[macIndex];
+                frequency |= (uint32_t)payload[macIndex + 1] << 8;
+                frequency |= (uint32_t)payload[macIndex + 2] << 16;
                 frequency *= 100;
-                datarate   = payload[macIndex++] & 0x0F;
+                datarate   = payload[macIndex + 3] & 0x0F;
+                macIndex  += 4;
 
                 status           = LoRaMacClassBPingSlotChannelReq(datarate, frequency);
                 macCmdPayload[0] = status;
@@ -2485,9 +2489,10 @@ static void ProcessMacCommands(uint8_t* payload, uint8_t macIndex, uint8_t comma
                     uint16_t beaconTimingDelay   = 0;
                     uint8_t  beaconTimingChannel = 0;
 
-                    beaconTimingDelay   = (uint16_t)payload[macIndex++];
-                    beaconTimingDelay  |= (uint16_t)payload[macIndex++] << 8;
-                    beaconTimingChannel = payload[macIndex++];
+                    beaconTimingDelay   = (uint16_t)payload[macIndex];
+                    beaconTimingDelay  |= (uint16_t)payload[macIndex + 1] << 8;
+                    beaconTimingChannel = payload[macIndex + 2];
+                    macIndex += 3;
 
                     LoRaMacClassBBeaconTimingAns(beaconTimingDelay, beaconTimingChannel, RxDoneParams.LastRxDone);
                 }
@@ -2497,10 +2502,11 @@ static void ProcessMacCommands(uint8_t* payload, uint8_t macIndex, uint8_t comma
             case SRV_MAC_BEACON_FREQ_REQ : {
                 uint32_t frequency;
 
-                frequency  = (uint32_t)payload[macIndex++];
-                frequency |= (uint32_t)payload[macIndex++] << 8;
-                frequency |= (uint32_t)payload[macIndex++] << 16;
+                frequency  = (uint32_t)payload[macIndex];
+                frequency |= (uint32_t)payload[macIndex + 1] << 8;
+                frequency |= (uint32_t)payload[macIndex + 2] << 16;
                 frequency *= 100;
+                macIndex  += 3;
 
                 if (LoRaMacClassBBeaconFreqReq(frequency) == true) {
                     macCmdPayload[0] = 1;
@@ -2703,15 +2709,15 @@ static LoRaMacStatus_t SendReJoinReq(JoinReqIdentifier_t joinReqType) {
 
 static LoRaMacStatus_t CheckForClassBCollision(void) {
     if (LoRaMacClassBIsBeaconExpected() == true) {
-        return LORAMAC_STATUS_BUSY_BEACON_RESERVED_TIME;
+        return (LORAMAC_STATUS_BUSY_BEACON_RESERVED_TIME);
     }
 
     if (Nvm.MacGroup2.DeviceClass == CLASS_B) {
         if (LoRaMacClassBIsPingExpected() == true) {
-            return LORAMAC_STATUS_BUSY_PING_SLOT_WINDOW_TIME;
+            return (LORAMAC_STATUS_BUSY_PING_SLOT_WINDOW_TIME);
         }
         else if (LoRaMacClassBIsMulticastExpected() == true) {
-            return LORAMAC_STATUS_BUSY_PING_SLOT_WINDOW_TIME;
+            return (LORAMAC_STATUS_BUSY_PING_SLOT_WINDOW_TIME);
         }
     }
     return (LORAMAC_STATUS_OK);
@@ -2752,13 +2758,14 @@ static LoRaMacStatus_t VerifyTxFrame(void) {
 
     if (Nvm.MacGroup2.NetworkActivation != ACTIVATION_TYPE_NONE) {
         if (LoRaMacCommandsGetSizeSerializedCmds(&macCmdsSize) != LORAMAC_COMMANDS_SUCCESS) {
-            return LORAMAC_STATUS_MAC_COMMAD_ERROR;
+            return (LORAMAC_STATUS_MAC_COMMAD_ERROR);
         }
 
         if (ValidatePayloadLength(MacCtx.AppDataSize, Nvm.MacGroup1.ChannelsDatarate, macCmdsSize) == false) {
-            return LORAMAC_STATUS_LENGTH_ERROR;
+            return (LORAMAC_STATUS_LENGTH_ERROR);
         }
     }
+
     return (LORAMAC_STATUS_OK);
 }
 
@@ -3142,7 +3149,7 @@ static LoRaMacStatus_t PrepareFrame(LoRaMacHeader_t* macHdr, LoRaMacFrameCtrl_t*
             Message->Data.FRMPayload       = MacCtx.AppData;
 
             if (LORAMAC_CRYPTO_SUCCESS != LoRaMacCryptoGetFCntUp(&fCntUp)) {
-                return LORAMAC_STATUS_FCNT_HANDLER_ERROR;
+                return (LORAMAC_STATUS_FCNT_HANDLER_ERROR);
             }
             Message->Data.FHDR.FCnt = (uint16_t)fCntUp;
 
@@ -3153,7 +3160,7 @@ static LoRaMacStatus_t PrepareFrame(LoRaMacHeader_t* macHdr, LoRaMacFrameCtrl_t*
 
             // Handle the MAC commands if there are any available
             if (LoRaMacCommandsGetSizeSerializedCmds(&macCmdsSize) != LORAMAC_COMMANDS_SUCCESS) {
-                return LORAMAC_STATUS_MAC_COMMAD_ERROR;
+                return (LORAMAC_STATUS_MAC_COMMAD_ERROR);
             }
 
             if (macCmdsSize > 0) {
@@ -3164,7 +3171,7 @@ static LoRaMacStatus_t PrepareFrame(LoRaMacHeader_t* macHdr, LoRaMacFrameCtrl_t*
                     if (LoRaMacCommandsSerializeCmds(LORA_MAC_COMMAND_MAX_FOPTS_LENGTH, &macCmdsSize,
                                                      Message->Data.FHDR.FOpts) !=
                         LORAMAC_COMMANDS_SUCCESS) {
-                        return LORAMAC_STATUS_MAC_COMMAD_ERROR;
+                        return (LORAMAC_STATUS_MAC_COMMAD_ERROR);
                     }
                     fCtrl->Bits.FOptsLen = macCmdsSize;
                     // Update FCtrl field with new value of FOptionsLength
@@ -3175,15 +3182,16 @@ static LoRaMacStatus_t PrepareFrame(LoRaMacHeader_t* macHdr, LoRaMacFrameCtrl_t*
 
                     if (LoRaMacCommandsSerializeCmds(availableSize, &macCmdsSize, MacCtx.MacCommandsBuffer) !=
                         LORAMAC_COMMANDS_SUCCESS) {
-                        return LORAMAC_STATUS_MAC_COMMAD_ERROR;
+                        return (LORAMAC_STATUS_MAC_COMMAD_ERROR);
                     }
-                    return LORAMAC_STATUS_SKIPPED_APP_DATA;
+
+                    return (LORAMAC_STATUS_SKIPPED_APP_DATA);
                 }
                 // No application payload available therefore add all mac commands to the FRMPayload.
                 else {
                     if (LoRaMacCommandsSerializeCmds(availableSize, &macCmdsSize, MacCtx.MacCommandsBuffer) !=
                         LORAMAC_COMMANDS_SUCCESS) {
-                        return LORAMAC_STATUS_MAC_COMMAD_ERROR;
+                        return (LORAMAC_STATUS_MAC_COMMAD_ERROR);
                     }
                     // Force FPort to be zero
                     Message->Data.FPort = 0;
@@ -3203,7 +3211,7 @@ static LoRaMacStatus_t PrepareFrame(LoRaMacHeader_t* macHdr, LoRaMacFrameCtrl_t*
             break;
 
         default :
-            return LORAMAC_STATUS_SERVICE_UNKNOWN;
+            return (LORAMAC_STATUS_SERVICE_UNKNOWN);
     }
 
     return (LORAMAC_STATUS_OK);
@@ -3703,7 +3711,7 @@ LoRaMacStatus_t LoRaMacInitialization(LoRaMacPrimitives_t const* primitives,
 
     // Initialize MAC commands module
     if (LoRaMacCommandsInit() != LORAMAC_COMMANDS_SUCCESS) {
-        return LORAMAC_STATUS_MAC_COMMAD_ERROR;
+        return (LORAMAC_STATUS_MAC_COMMAD_ERROR);
     }
 
     // Set multicast downlink counter reference
