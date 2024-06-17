@@ -349,7 +349,13 @@ typedef struct sRegionCommonGetNextLowerTxDrParams
  *
  * \retval Returns 1 if the value is in range, otherwise 0.
  */
-uint8_t RegionCommonValueInRange( int8_t value, int8_t min, int8_t max );
+static inline uint8_t RegionCommonValueInRange(int8_t value, int8_t min, int8_t max) {
+    if ((value >= min) && (value <= max)) {
+        return (1);
+    }
+
+    return (0);
+}
 
 /*!
  * \brief Verifies, if a datarate is available on an active channel.
