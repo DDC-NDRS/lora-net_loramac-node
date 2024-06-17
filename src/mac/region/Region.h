@@ -401,7 +401,7 @@ typedef union uPhyParam
      * Duty Cycle Period
      */
     TimerTime_t DutyCycleTimePeriod;
-}PhyParam_t;
+} PhyParam_t;
 
 /*!
  * Parameter structure for the function RegionGetPhyParam.
