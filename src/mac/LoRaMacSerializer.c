@@ -28,6 +28,7 @@ LoRaMacSerializerStatus_t LoRaMacSerializerJoinRequest( LoRaMacMessageJoinReques
         return LORAMAC_SERIALIZER_ERROR_NPE;
     }
 
+    uint8_t* Buffer = macMsg->Buffer;
     uint16_t bufItr = 0;
 
     // Check macMsg->BufSize
@@ -36,21 +37,21 @@ LoRaMacSerializerStatus_t LoRaMacSerializerJoinRequest( LoRaMacMessageJoinReques
         return LORAMAC_SERIALIZER_ERROR_BUF_SIZE;
     }
 
-    macMsg->Buffer[bufItr++] = macMsg->MHDR.Value;
+    Buffer[bufItr++] = macMsg->MHDR.Value;
 
-    memcpyr( &macMsg->Buffer[bufItr], macMsg->JoinEUI, LORAMAC_JOIN_EUI_FIELD_SIZE );
+    memcpyr( &Buffer[bufItr], macMsg->JoinEUI, LORAMAC_JOIN_EUI_FIELD_SIZE );
     bufItr += LORAMAC_JOIN_EUI_FIELD_SIZE;
 
-    memcpyr( &macMsg->Buffer[bufItr], macMsg->DevEUI, LORAMAC_DEV_EUI_FIELD_SIZE );
+    memcpyr( &Buffer[bufItr], macMsg->DevEUI, LORAMAC_DEV_EUI_FIELD_SIZE );
     bufItr += LORAMAC_DEV_EUI_FIELD_SIZE;
 
-    macMsg->Buffer[bufItr++] = macMsg->DevNonce & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->DevNonce >> 8 ) & 0xFF;
+    Buffer[bufItr++] = macMsg->DevNonce & 0xFF;
+    Buffer[bufItr++] = ( macMsg->DevNonce >> 8 ) & 0xFF;
 
-    macMsg->Buffer[bufItr++] = macMsg->MIC & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 8 ) & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 16 ) & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 24 ) & 0xFF;
+    Buffer[bufItr++] = macMsg->MIC & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 8 ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 16 ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 24 ) & 0xFF;
 
     macMsg->BufSize = bufItr;
 
@@ -64,6 +65,7 @@ LoRaMacSerializerStatus_t LoRaMacSerializerReJoinType1( LoRaMacMessageReJoinType
         return LORAMAC_SERIALIZER_ERROR_NPE;
     }
 
+    uint8_t* Buffer = macMsg->Buffer;
     uint16_t bufItr = 0;
 
     // Check macMsg->BufSize
@@ -72,22 +74,22 @@ LoRaMacSerializerStatus_t LoRaMacSerializerReJoinType1( LoRaMacMessageReJoinType
         return LORAMAC_SERIALIZER_ERROR_BUF_SIZE;
     }
 
-    macMsg->Buffer[bufItr++] = macMsg->MHDR.Value;
-    macMsg->Buffer[bufItr++] = macMsg->ReJoinType;
+    Buffer[bufItr++] = macMsg->MHDR.Value;
+    Buffer[bufItr++] = macMsg->ReJoinType;
 
-    memcpyr( &macMsg->Buffer[bufItr], macMsg->JoinEUI, LORAMAC_JOIN_EUI_FIELD_SIZE );
+    memcpyr( &Buffer[bufItr], macMsg->JoinEUI, LORAMAC_JOIN_EUI_FIELD_SIZE );
     bufItr += LORAMAC_JOIN_EUI_FIELD_SIZE;
 
-    memcpyr( &macMsg->Buffer[bufItr], macMsg->DevEUI, LORAMAC_DEV_EUI_FIELD_SIZE );
+    memcpyr( &Buffer[bufItr], macMsg->DevEUI, LORAMAC_DEV_EUI_FIELD_SIZE );
     bufItr += LORAMAC_DEV_EUI_FIELD_SIZE;
 
-    macMsg->Buffer[bufItr++] = macMsg->RJcount1 & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->RJcount1 >> 8 ) & 0xFF;
+    Buffer[bufItr++] = macMsg->RJcount1 & 0xFF;
+    Buffer[bufItr++] = ( macMsg->RJcount1 >> 8 ) & 0xFF;
 
-    macMsg->Buffer[bufItr++] = macMsg->MIC & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 8 ) & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 16 ) & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 24 ) & 0xFF;
+    Buffer[bufItr++] = macMsg->MIC & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 8 ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 16 ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 24 ) & 0xFF;
 
     macMsg->BufSize = bufItr;
 
@@ -101,6 +103,7 @@ LoRaMacSerializerStatus_t LoRaMacSerializerReJoinType0or2( LoRaMacMessageReJoinT
         return LORAMAC_SERIALIZER_ERROR_NPE;
     }
 
+    uint8_t* Buffer = macMsg->Buffer;
     uint16_t bufItr = 0;
 
     // Check macMsg->BufSize
@@ -109,22 +112,22 @@ LoRaMacSerializerStatus_t LoRaMacSerializerReJoinType0or2( LoRaMacMessageReJoinT
         return LORAMAC_SERIALIZER_ERROR_BUF_SIZE;
     }
 
-    macMsg->Buffer[bufItr++] = macMsg->MHDR.Value;
-    macMsg->Buffer[bufItr++] = macMsg->ReJoinType;
+    Buffer[bufItr++] = macMsg->MHDR.Value;
+    Buffer[bufItr++] = macMsg->ReJoinType;
 
-    memcpy1( &macMsg->Buffer[bufItr], macMsg->NetID, LORAMAC_NET_ID_FIELD_SIZE );
+    memcpy1( &Buffer[bufItr], macMsg->NetID, LORAMAC_NET_ID_FIELD_SIZE );
     bufItr += LORAMAC_NET_ID_FIELD_SIZE;
 
-    memcpyr( &macMsg->Buffer[bufItr], macMsg->DevEUI, LORAMAC_DEV_EUI_FIELD_SIZE );
+    memcpyr( &Buffer[bufItr], macMsg->DevEUI, LORAMAC_DEV_EUI_FIELD_SIZE );
     bufItr += LORAMAC_DEV_EUI_FIELD_SIZE;
 
-    macMsg->Buffer[bufItr++] = macMsg->RJcount0 & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->RJcount0 >> 8 ) & 0xFF;
+    Buffer[bufItr++] = macMsg->RJcount0 & 0xFF;
+    Buffer[bufItr++] = ( macMsg->RJcount0 >> 8 ) & 0xFF;
 
-    macMsg->Buffer[bufItr++] = macMsg->MIC & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 8 ) & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 16 ) & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 24 ) & 0xFF;
+    Buffer[bufItr++] = macMsg->MIC & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 8 ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 16 ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 24 ) & 0xFF;
 
     macMsg->BufSize = bufItr;
 
@@ -138,6 +141,7 @@ LoRaMacSerializerStatus_t LoRaMacSerializerData( LoRaMacMessageData_t* macMsg )
         return LORAMAC_SERIALIZER_ERROR_NPE;
     }
 
+    uint8_t* Buffer = macMsg->Buffer;
     uint16_t bufItr = 0;
 
     // Check macMsg->BufSize
@@ -161,33 +165,33 @@ LoRaMacSerializerStatus_t LoRaMacSerializerData( LoRaMacMessageData_t* macMsg )
         return LORAMAC_SERIALIZER_ERROR_BUF_SIZE;
     }
 
-    macMsg->Buffer[bufItr++] = macMsg->MHDR.Value;
+    Buffer[bufItr++] = macMsg->MHDR.Value;
 
-    macMsg->Buffer[bufItr++] = ( macMsg->FHDR.DevAddr ) & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->FHDR.DevAddr >> 8 ) & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->FHDR.DevAddr >> 16 ) & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->FHDR.DevAddr >> 24 ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->FHDR.DevAddr ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->FHDR.DevAddr >> 8 ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->FHDR.DevAddr >> 16 ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->FHDR.DevAddr >> 24 ) & 0xFF;
 
-    macMsg->Buffer[bufItr++] = macMsg->FHDR.FCtrl.Value;
+    Buffer[bufItr++] = macMsg->FHDR.FCtrl.Value;
 
-    macMsg->Buffer[bufItr++] = macMsg->FHDR.FCnt & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->FHDR.FCnt >> 8 ) & 0xFF;
+    Buffer[bufItr++] = macMsg->FHDR.FCnt & 0xFF;
+    Buffer[bufItr++] = ( macMsg->FHDR.FCnt >> 8 ) & 0xFF;
 
-    memcpy1( &macMsg->Buffer[bufItr], macMsg->FHDR.FOpts, macMsg->FHDR.FCtrl.Bits.FOptsLen );
+    memcpy1( &Buffer[bufItr], macMsg->FHDR.FOpts, macMsg->FHDR.FCtrl.Bits.FOptsLen );
     bufItr = bufItr + macMsg->FHDR.FCtrl.Bits.FOptsLen;
 
     if( macMsg->FRMPayloadSize > 0 )
     {
-        macMsg->Buffer[bufItr++] = macMsg->FPort;
+        Buffer[bufItr++] = macMsg->FPort;
     }
 
-    memcpy1( &macMsg->Buffer[bufItr], macMsg->FRMPayload, macMsg->FRMPayloadSize );
+    memcpy1( &Buffer[bufItr], macMsg->FRMPayload, macMsg->FRMPayloadSize );
     bufItr = bufItr + macMsg->FRMPayloadSize;
 
-    macMsg->Buffer[bufItr++] = macMsg->MIC & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 8 ) & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 16 ) & 0xFF;
-    macMsg->Buffer[bufItr++] = ( macMsg->MIC >> 24 ) & 0xFF;
+    Buffer[bufItr++] = macMsg->MIC & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 8 ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 16 ) & 0xFF;
+    Buffer[bufItr++] = ( macMsg->MIC >> 24 ) & 0xFF;
 
     macMsg->BufSize = bufItr;
 
