@@ -197,8 +197,7 @@ extern "C"
  *
  * LoRaWAN Specification V1.0.2, chapter 5.4
  */
-typedef union uLoRaMacDLSettings
-{
+typedef union uLoRaMacDLSettings {
     /*!
      * Byte-access to the bits
      */
@@ -206,8 +205,7 @@ typedef union uLoRaMacDLSettings
     /*!
      * Structure containing single access to header bits
      */
-    struct sDLSettingsBits
-    {
+    struct sDLSettingsBits {
         /*!
          * Data rate of a downlink using the second receive window
          */
@@ -220,16 +218,15 @@ typedef union uLoRaMacDLSettings
          * Indicates network server LoRaWAN implementation version 1.1 or later.
          */
         uint8_t OptNeg          : 1;
-    }Bits;
-}LoRaMacDLSettings_t;
+    } Bits;
+} LoRaMacDLSettings_t;
 
 /*!
  * LoRaMAC header field definition (MHDR field)
  *
  * LoRaWAN Specification V1.0.2, chapter 4.2
  */
-typedef union uLoRaMacHeader
-{
+typedef union uLoRaMacHeader {
     /*!
      * Byte-access to the bits
      */
@@ -237,8 +234,7 @@ typedef union uLoRaMacHeader
     /*!
      * Structure containing single access to header bits
      */
-    struct sMacHeaderBits
-    {
+    struct sMacHeaderBits {
         /*!
          * Major version
          */
@@ -251,16 +247,15 @@ typedef union uLoRaMacHeader
          * Message type
          */
         uint8_t MType           : 3;
-    }Bits;
-}LoRaMacHeader_t;
+    } Bits;
+} LoRaMacHeader_t;
 
 /*!
  * LoRaMAC frame control field definition (FCtrl)
  *
  * LoRaWAN Specification V1.0.2, chapter 4.3.1
  */
-typedef union uLoRaMacFrameCtrl
-{
+typedef union uLoRaMacFrameCtrl {
     /*!
      * Byte-access to the bits
      */
@@ -268,8 +263,7 @@ typedef union uLoRaMacFrameCtrl
     /*!
      * Structure containing single access to bits
      */
-    struct sCtrlBits
-    {
+    struct sCtrlBits {
         /*!
          * Frame options length
          */
@@ -290,16 +284,15 @@ typedef union uLoRaMacFrameCtrl
          * ADR control in frame header
          */
         uint8_t Adr             : 1;
-    }Bits;
-}LoRaMacFrameCtrl_t;
+    } Bits;
+} LoRaMacFrameCtrl_t;
 
 /*!
  * LoRaMac Frame header (FHDR)
  *
  * LoRaWAN Specification V1.0.2, chapter 4.3.1
  */
-typedef struct sLoRaMacFrameHeader
-{
+typedef struct sLoRaMacFrameHeader {
     /*!
      * Device address
      */
@@ -316,7 +309,7 @@ typedef struct sLoRaMacFrameHeader
      * FOpts field may transport  MAC commands (opt. 0-15 Bytes)
      */
     uint8_t FOpts[LORAMAC_FHDR_F_OPTS_MAX_FIELD_SIZE];
-}LoRaMacFrameHeader_t;
+} LoRaMacFrameHeader_t;
 
 /*! \} addtogroup LORAMAC */
 
