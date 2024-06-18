@@ -362,6 +362,7 @@ const struct Radio_s Radio = {
     RadioSetPublicNetwork,
     RadioGetWakeupTime,
     RadioIrqProcess,
+
     // Available on LR1110 only
     RadioRxBoosted,
     RadioSetRxDutyCycle,

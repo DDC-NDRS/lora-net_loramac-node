@@ -766,28 +766,33 @@ void RadioSetTxConfig(RadioModems_t modem, int8_t power, uint32_t fdev,
 
     switch (modem) {
         case MODEM_FSK : {
+            struct ModulationParamsGfsk_s* ModulationGfsk;
+            struct PacketParamsGfsk_s* PacketGfsk;
+
             Modulation->PacketType = PACKET_TYPE_GFSK;
-            Modulation->Params.Gfsk.BitRate = datarate;
+            ModulationGfsk = &Modulation->Params.Gfsk;
 
-            Modulation->Params.Gfsk.ModulationShaping = MOD_SHAPING_G_BT_1;
-            Modulation->Params.Gfsk.Bandwidth =
-                RadioGetFskBandwidthRegValue(bandwidth << 1); // SX126x badwidth is double sided
-            Modulation->Params.Gfsk.Fdev = fdev;
+            ModulationGfsk->BitRate = datarate;
+            ModulationGfsk->ModulationShaping = MOD_SHAPING_G_BT_1;
+            ModulationGfsk->Bandwidth = RadioGetFskBandwidthRegValue(bandwidth << 1); // SX126x badwidth is double sided
+            ModulationGfsk->Fdev = fdev;
 
-            Packet->PacketType                    = PACKET_TYPE_GFSK;
-            Packet->Params.Gfsk.PreambleLength    = (preambleLen << 3); // convert byte into bit
-            Packet->Params.Gfsk.PreambleMinDetect = RADIO_PREAMBLE_DETECTOR_08_BITS;
-            Packet->Params.Gfsk.SyncWordLength    = 3 << 3; // convert byte into bit
-            Packet->Params.Gfsk.AddrComp          = RADIO_ADDRESSCOMP_FILT_OFF;
-            Packet->Params.Gfsk.HeaderType = (fixLen == true) ? RADIO_PACKET_FIXED_LENGTH : RADIO_PACKET_VARIABLE_LENGTH;
+            Packet->PacketType = PACKET_TYPE_GFSK;
+            PacketGfsk = &Packet->Params.Gfsk;
+
+            PacketGfsk->PreambleLength    = (preambleLen << 3); // convert byte into bit
+            PacketGfsk->PreambleMinDetect = RADIO_PREAMBLE_DETECTOR_08_BITS;
+            PacketGfsk->SyncWordLength    = 3 << 3; // convert byte into bit
+            PacketGfsk->AddrComp          = RADIO_ADDRESSCOMP_FILT_OFF;
+            PacketGfsk->HeaderType = (fixLen == true) ? RADIO_PACKET_FIXED_LENGTH : RADIO_PACKET_VARIABLE_LENGTH;
 
             if (crcOn == true) {
-                Packet->Params.Gfsk.CrcLength = RADIO_CRC_2_BYTES_CCIT;
+                PacketGfsk->CrcLength = RADIO_CRC_2_BYTES_CCIT;
             }
             else {
-                Packet->Params.Gfsk.CrcLength = RADIO_CRC_OFF;
+                PacketGfsk->CrcLength = RADIO_CRC_OFF;
             }
-            Packet->Params.Gfsk.DcFree = RADIO_DC_FREEWHITENING;
+            PacketGfsk->DcFree = RADIO_DC_FREEWHITENING;
 
             RadioStandby();
             RadioSetModem(MODEM_FSK);
@@ -799,38 +804,44 @@ void RadioSetTxConfig(RadioModems_t modem, int8_t power, uint32_t fdev,
         }
 
         case MODEM_LORA : {
-            Modulation->PacketType                  = PACKET_TYPE_LORA;
-            Modulation->Params.LoRa.SpreadingFactor = (RadioLoRaSpreadingFactors_t)datarate;
-            Modulation->Params.LoRa.Bandwidth       = Bandwidths[bandwidth];
-            Modulation->Params.LoRa.CodingRate      = (RadioLoRaCodingRates_t)coderate;
+            struct ModulationParamsLoRa_s* ModulationLoRa;
+            struct PacketParamsLoRa_s* PacketLoRa;
+
+            Modulation->PacketType = PACKET_TYPE_LORA;
+            ModulationLoRa = &Modulation->Params.LoRa;
+
+            ModulationLoRa->SpreadingFactor = (RadioLoRaSpreadingFactors_t)datarate;
+            ModulationLoRa->Bandwidth       = Bandwidths[bandwidth];
+            ModulationLoRa->CodingRate      = (RadioLoRaCodingRates_t)coderate;
 
             if (((bandwidth == 0) && ((datarate == 11) || (datarate == 12))) ||
                 ((bandwidth == 1) && (datarate == 12))) {
-                Modulation->Params.LoRa.LowDatarateOptimize = 0x01;
+                ModulationLoRa->LowDatarateOptimize = 0x01;
             }
             else {
-                Modulation->Params.LoRa.LowDatarateOptimize = 0x00;
+                ModulationLoRa->LowDatarateOptimize = 0x00;
             }
 
             Packet->PacketType = PACKET_TYPE_LORA;
+            PacketLoRa = &Packet->Params.LoRa;
 
-            if ((Modulation->Params.LoRa.SpreadingFactor == LORA_SF5) ||
-                (Modulation->Params.LoRa.SpreadingFactor == LORA_SF6)) {
+            if ((ModulationLoRa->SpreadingFactor == LORA_SF5) ||
+                (ModulationLoRa->SpreadingFactor == LORA_SF6)) {
                 if (preambleLen < 12) {
-                    Packet->Params.LoRa.PreambleLength = 12;
+                    PacketLoRa->PreambleLength = 12;
                 }
                 else {
-                    Packet->Params.LoRa.PreambleLength = preambleLen;
+                    PacketLoRa->PreambleLength = preambleLen;
                 }
             }
             else {
-                Packet->Params.LoRa.PreambleLength = preambleLen;
+                PacketLoRa->PreambleLength = preambleLen;
             }
 
-            Packet->Params.LoRa.HeaderType    = (RadioLoRaPacketLengthsMode_t)fixLen;
-            Packet->Params.LoRa.PayloadLength = MaxPayloadLength;
-            Packet->Params.LoRa.CrcMode       = (RadioLoRaCrcModes_t)crcOn;
-            Packet->Params.LoRa.InvertIQ      = (RadioLoRaIQModes_t)iqInverted;
+            PacketLoRa->HeaderType    = (RadioLoRaPacketLengthsMode_t)fixLen;
+            PacketLoRa->PayloadLength = MaxPayloadLength;
+            PacketLoRa->CrcMode       = (RadioLoRaCrcModes_t)crcOn;
+            PacketLoRa->InvertIQ      = (RadioLoRaIQModes_t)iqInverted;
 
             RadioStandby();
             RadioSetModem(MODEM_LORA);
@@ -840,7 +851,8 @@ void RadioSetTxConfig(RadioModems_t modem, int8_t power, uint32_t fdev,
         }
     }
 
-    // WORKAROUND - Modulation Quality with 500 kHz LoRa Bandwidth, see DS_SX1261-2_V1.2 datasheet chapter 15.1
+    // WORKAROUND - Modulation Quality with 500 kHz LoRa Bandwidth,
+    // see DS_SX1261-2_V1.2 datasheet chapter 15.1
     if ((modem == MODEM_LORA) && (Modulation->Params.LoRa.Bandwidth == LORA_BW_500)) {
         SX126xWriteRegister(REG_TX_MODULATION, SX126xReadRegister(REG_TX_MODULATION) & ~(1 << 2));
     }
@@ -854,7 +866,7 @@ void RadioSetTxConfig(RadioModems_t modem, int8_t power, uint32_t fdev,
 }
 
 bool RadioCheckRfFrequency(uint32_t frequency) {
-    return true;
+    return (true);
 }
 
 static uint32_t RadioGetLoRaBandwidthInHz(RadioLoRaBandwidths_t bw) {
@@ -864,36 +876,45 @@ static uint32_t RadioGetLoRaBandwidthInHz(RadioLoRaBandwidths_t bw) {
         case LORA_BW_007 :
             bandwidthInHz = 7812UL;
             break;
+
         case LORA_BW_010 :
             bandwidthInHz = 10417UL;
             break;
+
         case LORA_BW_015 :
             bandwidthInHz = 15625UL;
             break;
+
         case LORA_BW_020 :
             bandwidthInHz = 20833UL;
             break;
+
         case LORA_BW_031 :
             bandwidthInHz = 31250UL;
             break;
+
         case LORA_BW_041 :
             bandwidthInHz = 41667UL;
             break;
+
         case LORA_BW_062 :
             bandwidthInHz = 62500UL;
             break;
+
         case LORA_BW_125 :
             bandwidthInHz = 125000UL;
             break;
+
         case LORA_BW_250 :
             bandwidthInHz = 250000UL;
             break;
+
         case LORA_BW_500 :
             bandwidthInHz = 500000UL;
             break;
     }
 
-    return bandwidthInHz;
+    return (bandwidthInHz);
 }
 
 static uint32_t RadioGetGfskTimeOnAirNumerator(uint32_t datarate, uint8_t coderate,
@@ -916,8 +937,8 @@ static uint32_t RadioGetLoRaTimeOnAirNumerator(uint32_t bandwidth,
                                                uint32_t datarate, uint8_t coderate,
                                                uint16_t preambleLen, bool fixLen, uint8_t payloadLen,
                                                bool crcOn) {
-    int32_t crDenom           = coderate + 4;
-    bool    lowDatareOptimize = false;
+    int32_t crDenom = coderate + 4;
+    bool lowDatareOptimize = false;
 
     // Ensure that the preamble length is at least 12 symbols when using SF5 or
     // SF6
@@ -1077,7 +1098,7 @@ void RadioAddRegisterToRetentionList(uint16_t registerAddress) {
     SX126xReadRegisters(REG_RETENTION_LIST_BASE_ADDRESS, buffer, 9);
 
     const uint8_t nbOfRegisters = buffer[0];
-    uint8_t*      registerList  = &buffer[1];
+    uint8_t* registerList = &buffer[1];
 
     // Check if the register given as parameter is already added to the list
     for (uint8_t i = 0; i < nbOfRegisters; i++) {
@@ -1186,7 +1207,7 @@ void RadioIrqProcess(void) {
     CRITICAL_SECTION_BEGIN();
     // Clear IRQ flag
     bool const isIrqFired = IrqFired;
-    IrqFired              = false;
+    IrqFired = false;
     CRITICAL_SECTION_END();
 
     if (isIrqFired == true) {
@@ -1217,6 +1238,7 @@ void RadioIrqProcess(void) {
                     //!< Update operating mode state to a value lower than \ref MODE_STDBY_XOSC
                     SX126xSetOperatingMode(MODE_STDBY_RC);
                 }
+
                 if ((RadioEvents != NULL) && (RadioEvents->RxError)) {
                     RadioEvents->RxError();
                 }
@@ -1228,11 +1250,13 @@ void RadioIrqProcess(void) {
                     //!< Update operating mode state to a value lower than \ref MODE_STDBY_XOSC
                     SX126xSetOperatingMode(MODE_STDBY_RC);
 
-                    // WORKAROUND - Implicit Header Mode Timeout Behavior, see DS_SX1261-2_V1.2 datasheet chapter 15.3
+                    // WORKAROUND - Implicit Header Mode Timeout Behavior,
+                    // see DS_SX1261-2_V1.2 datasheet chapter 15.3
                     SX126xWriteRegister(REG_RTC_CTRL, 0x00);
                     SX126xWriteRegister(REG_EVT_CLR, SX126xReadRegister(REG_EVT_CLR) | (1 << 1));
                     // WORKAROUND END
                 }
+
                 SX126xGetPayload(RadioRxPayload, &size, 255);
                 SX126xGetPacketStatus(&RadioPktStatus);
                 if ((RadioEvents != NULL) && (RadioEvents->RxDone != NULL)) {
