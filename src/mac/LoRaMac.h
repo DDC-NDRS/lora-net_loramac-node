@@ -256,11 +256,6 @@ typedef struct sLoRaMacParams
      */
     uint32_t SystemMaxRxError;
     /*!
-     * Minimum required number of symbols to detect an Rx frame
-     * Default: 6 symbols
-     */
-    uint8_t MinRxSymbols;
-    /*!
      * LoRaMac maximum time a reception window stays open
      */
     uint32_t MaxRxWindow;
@@ -284,6 +279,11 @@ typedef struct sLoRaMacParams
      * Number of uplink messages repetitions [1:15]
      */
     uint8_t ChannelsNbTrans;
+    /*!
+     * Minimum required number of symbols to detect an Rx frame
+     * Default: 6 symbols
+     */
+    uint8_t MinRxSymbols;
     /*!
      * Datarate offset between uplink and downlink on first window
      */
@@ -322,7 +322,7 @@ typedef struct sLoRaMacParams
      * with set ADRACKReq bit before the trying to regain the connectivity.
      */
     uint16_t AdrAckDelay;
-}LoRaMacParams_t;
+} LoRaMacParams_t;
 
 /*!
  * LoRaMAC data structure for a PingSlotInfoReq \ref MLME_PING_SLOT_INFO
@@ -405,8 +405,8 @@ typedef struct sBeaconInfo
          * Info - can differ for each gateway
          */
         uint8_t Info[6];
-    }GwSpecific;
-}BeaconInfo_t;
+    } GwSpecific;
+} BeaconInfo_t;
 
 /*!
  * Enumeration containing the status of the operation of a MAC service
@@ -520,7 +520,7 @@ typedef union eLoRaMacFlags_t
          * Indicate if a NVM handling is required
          */
         uint8_t NvmHandle               : 1;
-    }Bits;
+    } Bits;
 }LoRaMacFlags_t;
 
 /*!
@@ -796,7 +796,7 @@ typedef struct sLoRaMacNvmData
      * Parameters related to class b.
      */
     LoRaMacClassBNvmData_t ClassB;
-}LoRaMacNvmData_t;
+} LoRaMacNvmData_t;
 
 /*!
  *
@@ -839,7 +839,7 @@ typedef enum eMcps
      * Proprietary frame
      */
     MCPS_PROPRIETARY,
-}Mcps_t;
+} Mcps_t;
 
 /*!
  * Structure which defines return parameters for requests.
